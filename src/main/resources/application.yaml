@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: payment-service
+
+  datasource:
+    url: ${PAYMENT_DATASOURCE_URL}
+    username: ${PAYMENT_DATASOURCE_USERNAME}
+    password: ${PAYMENT_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      "[hibernate.format_sql]": true
+    open-in-view: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # tell Gateway how to validate JWT
+          # it will use this environment variable to explore the public key of user-service
+          jwk-set-uri: ${ECOMMERCE_JWT_JWK_SET_URI}
+
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: payment-service-group
+      auto-offset-reset: earliest
+    admin:
+      properties:
+        "[bootstrap.servers]": kafka:9092
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE}
+  instance:
+    # make local development also use IP (optional, but useful in mixed environments)
+    prefer-ip-address: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health, prometheus"
+
+  endpoint:
+    prometheus:
+      enabled: true
+
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+
+  otlp:
+    tracing:
+      endpoint: http://tempo:4318/v1/traces

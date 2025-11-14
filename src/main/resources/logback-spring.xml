@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <springProperty scope="context" name="appName" source="spring.application.name"/>
+  <springProperty scope="context" name="hostname" source="HOSTNAME"/>
+
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date{ISO8601} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+    <http>
+      <url>http://loki:3100/loki/api/v1/push</url>
+      <connectionTimeoutMs>5000</connectionTimeoutMs>
+      <readTimeoutMs>10000</readTimeoutMs>
+    </http>
+
+    <batching>
+      <batchSize>500</batchSize>
+      <flushPeriod>1000</flushPeriod>
+      <queueSize>5000</queueSize>
+    </batching>
+
+    <format>
+      <label>
+        <pattern>app=${appName},hostname=${hostname},level=%level,traceId=%X{traceId:-NONE},spanId=%X{spanId:-NONE}</pattern>
+      </label>
+      <message>
+        <pattern>%date{ISO8601} %logger{36} - %msg%n</pattern>
+      </message>
+      <sortByTime>true</sortByTime>
+    </format>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="LOKI"/>
+  </root>
+
+</configuration>

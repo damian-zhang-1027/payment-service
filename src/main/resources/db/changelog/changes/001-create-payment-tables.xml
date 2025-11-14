@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="001-create-payments-table" author="damian">
+        <createTable tableName="payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="amount" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="third_party_tx_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_order_id_unique" tableName="payments" unique="true">
+            <column name="order_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_third_party_tx_id_unique" tableName="payments" unique="true">
+            <column name="third_party_tx_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="002-create-payment-items-table" author="damian">
+        <createTable tableName="payment_items">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="payment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_payment_id" tableName="payment_items">
+            <column name="payment_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                constraintName="fk_payment_items_payment"
+                baseTableName="payment_items"
+                baseColumnNames="payment_id"
+                referencedTableName="payments"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
